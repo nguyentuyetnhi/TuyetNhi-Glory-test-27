@@ -5,7 +5,6 @@ const Location = require("../models/Location");
 
 const API_URL = "https://669ce22d15704bb0e304842d.mockapi.io/assets";
 
-// Kết nối MongoDB
 mongoose
     .connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
     .then(() => console.log("MongoDB connected!"))
@@ -16,7 +15,7 @@ const fetchAndStoreData = async () => {
         const response = await axios.get(API_URL);
         const data = response.data;
 
-        // Lưu dữ liệu vào MongoDB
+        // save data to MongoDB
         for (const item of data) {
             await Location.findOneAndUpdate(
                 { location_id: item.id }, // Tìm theo ID
@@ -24,7 +23,7 @@ const fetchAndStoreData = async () => {
                     location_id: item.id,
                     location_name: item.name,
                     organization: item.organization,
-                    status: item.status.toLowerCase(), // Convert thành "actived" hoặc "unactive"
+                    status: item.status.toLowerCase(), // Convert to "actived" or "unactive"
                 },
                 { upsert: true, new: true }
             );

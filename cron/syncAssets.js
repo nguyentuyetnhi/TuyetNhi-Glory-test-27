@@ -22,7 +22,10 @@ async function syncAssets() {
     }
 }
 
-// Chạy cronjob mỗi 5 phút
+module.exports = syncAssets;
+
+
+// run 5 mins
 cron.schedule('*/5 * * * *', syncAssets);
 
 module.exports = syncAssets;
