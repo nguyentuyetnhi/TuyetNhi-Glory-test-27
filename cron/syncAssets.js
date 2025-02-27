@@ -28,12 +28,38 @@ async function syncAssets() {
         console.error('Error syncing assets:', error);
     }
 
+
 }
+
+async function fetchAssets() {
+    let retries = 3;
+    while (retries > 0) {
+        try {
+            const response = await axios.get('https://br-company.com/api/assets');
+            if (response.status === 200) {
+                return response.data;
+            }
+        } catch (error) {
+            console.error(` API error (${error.response?.status}). try again ...`);
+            retries--;
+            await new Promise(resolve => setTimeout(resolve, 3000));
+        }
+    }
+    return [];
+}
+
 
 module.exports = syncAssets;
 
 
-// run 5 mins
-cron.schedule('*/5 * * * *', syncAssets);
+cron.schedule('*/5 * * * *', async () => {
+    console.log("processing...");
+    try {
+        await syncAssets();
+        console.log("sync successful.");
+    } catch (error) {
+        console.error("error sync:", error);
+    }
+});
 
 module.exports = syncAssets;
