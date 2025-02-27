@@ -9,11 +9,16 @@ connectDB();
 
 app.use(express.json());
 
+require('dotenv').config();
 const PORT = process.env.PORT || 3000;
+const MONGO_URI = process.env.MONGO_URI;
+
+
 
 app.get('/', (req, res) => {
     res.send('Server is running...');
 });
+
 
 
 syncAssets();
