@@ -1,6 +1,6 @@
 const cron = require('node-cron');
 const axios = require('axios');
-const { Asset } = require('../models');
+const Asset = require('../models/asset');
 
 
 async function syncAssets() {
@@ -9,7 +9,6 @@ async function syncAssets() {
         const assets = response.data;
 
         for (const asset of assets) {
-            console.log("Asset Model:", Asset);
 
             await Asset.findOneAndUpdate(
                 { id: asset.id },
@@ -24,6 +23,7 @@ async function syncAssets() {
 
 
         console.log('Assets synchronized successfully.');
+        console.log("data", assets);
     } catch (error) {
         console.error('Error syncing assets:', error);
     }

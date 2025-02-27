@@ -9,4 +9,4 @@ const AssetSchema = new mongoose.Schema({
 
 const Asset = mongoose.model('Asset', AssetSchema);
 
-module.exports = Asset;  //
+module.exports = Asset;  
