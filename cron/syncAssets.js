@@ -2,14 +2,32 @@ const cron = require('node-cron');
 const axios = require('axios');
 const Asset = require('../models/asset');
 
+async function fetchAssets() {
+    let retries = 3;
+    while (retries > 0) {
+        try {
+            const response = await axios.get('https://669ce22d15704bb0e304842d.mockapi.io/assets');
+            if (response.status === 200) {
+                return response.data;
+            }
+        } catch (error) {
+            console.error(`API error (${error.response?.status}). Retrying...`);
+            retries--;
+            await new Promise(resolve => setTimeout(resolve, 3000));
+        }
+    }
+    return [];
+}
 
 async function syncAssets() {
     try {
-        const response = await axios.get('https://669ce22d15704bb0e304842d.mockapi.io/assets');
-        const assets = response.data;
+        const assets = await fetchAssets();
+        if (!assets.length) {
+            console.log('No assets to sync.');
+            return;
+        }
 
         for (const asset of assets) {
-
             await Asset.findOneAndUpdate(
                 { id: asset.id },
                 {
@@ -21,44 +39,21 @@ async function syncAssets() {
             );
         }
 
-
         console.log('Assets synchronized successfully.');
-        console.log("data", assets);
+        console.log(" Asset data:", assets);
     } catch (error) {
         console.error('Error syncing assets:', error);
     }
-
-
 }
 
-async function fetchAssets() {
-    let retries = 3;
-    while (retries > 0) {
-        try {
-            const response = await axios.get('https://br-company.com/api/assets');
-            if (response.status === 200) {
-                return response.data;
-            }
-        } catch (error) {
-            console.error(` API error (${error.response?.status}). try again ...`);
-            retries--;
-            await new Promise(resolve => setTimeout(resolve, 3000));
-        }
-    }
-    return [];
-}
-
-
-module.exports = syncAssets;
-
-
+// run job
 cron.schedule('*/5 * * * *', async () => {
-    console.log("processing...");
+    console.log("⏳ Running asset sync...");
     try {
         await syncAssets();
-        console.log("sync successful.");
+        console.log("Sync completed successfully.");
     } catch (error) {
-        console.error("error sync:", error);
+        console.error(" Sync failed:", error);
     }
 });
 
